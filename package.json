@@ -1,0 +1,46 @@
+{
+  "name": "my-app",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite optimize && vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@hookform/resolvers": "^5.7.1",
+    "@radix-ui/react-slot": "^1.3.3",
+    "@supabase/supabase-js": "^2.112.1",
+    "@tailwindcss/vite": "^4.1.18",
+    "@tanstack/react-query": "^5.101.4",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "date-fns": "^4.4.0",
+    "lucide-react": "^1.28.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-hook-form": "^7.84.0",
+    "react-is": "^19.2.8",
+    "react-router-dom": "^7.18.2",
+    "react-simple-maps": "^3.0.0",
+    "recharts": "^3.10.1",
+    "tailwind-merge": "^3.6.0",
+    "tailwindcss": "^4.1.18",
+    "world-atlas": "^2.0.2",
+    "zod": "^4.4.3",
+    "zustand": "^5.0.14"
+  },
+  "devDependencies": {
+    "@playwright/cli": "^0.1.18",
+    "@types/node": "^24.10.1",
+    "@types/react": "^18.3.1",
+    "@types/react-dom": "^18.3.1",
+    "@types/react-simple-maps": "^3.0.6",
+    "@vitejs/plugin-react": "^5.1.1",
+    "globals": "^16.5.0",
+    "typescript": "~5.9.3",
+    "vite": "^7.2.4",
+    "vite-plugin-svgr": "^4.5.0"
+  }
+}

@@ -1,0 +1,22 @@
+import { clsx, type ClassValue } from "clsx";
+import { twMerge } from "tailwind-merge";
+
+export function cn(...inputs: ClassValue[]) {
+  return twMerge(clsx(inputs));
+}
+
+export function initials(name: string): string {
+  return name
+    .split(" ")
+    .map((p) => p[0])
+    .filter(Boolean)
+    .slice(0, 2)
+    .join("")
+    .toUpperCase();
+}
+
+export function truncate(text: string, length: number): string {
+  return text.length > length ? `${text.slice(0, length)}…` : text;
+}
+
+export { formatDate, formatDateTime, timeAgo, formatNumber, formatCurrency, formatPercent, compactNumber, formatFlightHours, formatTailNumber, shortTail } from "./format";
