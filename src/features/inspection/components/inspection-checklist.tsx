@@ -17,7 +17,7 @@ const STATUS_CYCLE: ChecklistStatus[] = ["pending", "completed", "skipped"];
 
 export function InspectionChecklist({ entries }: InspectionChecklistProps) {
   const finalText = useMemo(
-    () => entries.filter((e) => e.isFinal).map((e) => e.text).join(" "),
+    () => entries.map((e) => e.text).join(" "),
     [entries],
   );
   const transcriptMatches = useMemo(

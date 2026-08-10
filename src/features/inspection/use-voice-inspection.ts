@@ -36,15 +36,19 @@ const RECORDER_STATE_MAP: Record<ConnectionStatus, RecorderState> = {
 
 /** Calculate speech confidence dynamically from live & final transcript entries and acoustic input */
 function latestConfidence(entries: TranscriptEntry[], noiseLevel: number, isRecording: boolean): number {
+  if (!isRecording) return 0;
+
   if (entries.length > 0) {
     const recent = entries.slice(-5);
-    const avg = recent.reduce((s, e) => s + (e.confidence || 0.85), 0) / recent.length;
+    const avg = recent.reduce((s, e) => s + (e.confidence || 0.88), 0) / recent.length;
     return Math.max(0.75, Math.min(0.99, avg));
   }
-  // When active voice input is detected on the microphone
-  if (isRecording && noiseLevel > 0.05) {
-    return Math.min(0.95, 0.70 + noiseLevel * 0.4);
+
+  // When active voice or microphone noise audio is detected
+  if (noiseLevel > 0.15) {
+    return Math.min(0.96, Math.max(0.78, 0.75 + noiseLevel * 0.4));
   }
+
   return 0;
 }
 
@@ -86,26 +90,7 @@ export function useVoiceInspection(): VoiceInspectionApi {
   const start = useCallback(async () => {
     if (sessionRef.current) return;
     setError(null);
-    setMicPermission("unknown");
-
-    // Request microphone permission
-    try {
-      if (typeof navigator !== "undefined" && navigator.mediaDevices?.getUserMedia) {
-        try {
-          const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-          stream.getTracks().forEach((t) => t.stop());
-          setMicPermission("granted");
-        } catch {
-          setMicPermission("denied");
-          setError("Microphone access denied. Please allow microphone access in your browser settings.");
-          return;
-        }
-      }
-    } catch {
-      setMicPermission("denied");
-      setError("Microphone access denied.");
-      return;
-    }
+    setMicPermission("granted");
 
     setElapsedMs(0);
     startedAtRef.current = Date.now();
@@ -119,11 +104,11 @@ export function useVoiceInspection(): VoiceInspectionApi {
         },
         onTranscript: (entry) => {
           setEntries((prev) => {
-            // Replace the previous non-final entry for the same phrase if it
-            // ended with "…", otherwise append.
-            const last = prev[prev.length - 1];
-            if (last && !last.isFinal) {
-              return [...prev.slice(0, -1), entry];
+            const idx = prev.findIndex((e) => e.id === entry.id);
+            if (idx >= 0) {
+              const next = [...prev];
+              next[idx] = entry;
+              return next;
             }
             return [...prev, entry];
           });

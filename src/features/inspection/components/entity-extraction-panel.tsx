@@ -40,7 +40,7 @@ function EntityRow({ entity }: { entity: ExtractedEntity }) {
 
 export function EntityExtractionPanel({ entries, isLive }: EntityExtractionPanelProps) {
   const finalText = useMemo(
-    () => entries.filter((e) => e.isFinal).map((e) => e.text).join(" "),
+    () => entries.map((e) => e.text).join(" "),
     [entries],
   );
   const entities = useMemo(() => extractEntities(finalText), [finalText]);
