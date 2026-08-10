@@ -152,112 +152,14 @@ export function LoginPage() {
     [email, password, setSession, navigate],
   );
 
-  /* ── Social login handlers ── */
-  const handleGoogleLogin = useCallback(async () => {
-    setStatus("loading");
-    setSubmitError(null);
-    try {
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider: "google",
-        options: { redirectTo: `${window.location.origin}${ROUTES.dashboard}` },
-      });
+  /* ── Social login placeholders ── */
+  const handleGoogleLogin = useCallback(() => {
+    setSubmitError("Google sign-in is coming soon.");
+  }, []);
 
-      if (error) {
-        setSession(
-          {
-            id: "google-user-1",
-            email: "alex.rivera@aeromaintain.com",
-            full_name: "Alex Rivera (Google SSO)",
-            role: "mechanic",
-            organization_id: "org-1",
-            avatar_url: null,
-            is_active: true,
-            last_login_at: new Date().toISOString(),
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString(),
-          },
-          "google-demo-token",
-        );
-      }
-      setStatus("success");
-      setTimeout(() => {
-        navigate(ROUTES.dashboard, { replace: true });
-      }, 300);
-    } catch {
-      setSession(
-        {
-          id: "google-user-1",
-          email: "alex.rivera@aeromaintain.com",
-          full_name: "Alex Rivera (Google SSO)",
-          role: "mechanic",
-          organization_id: "org-1",
-          avatar_url: null,
-          is_active: true,
-          last_login_at: new Date().toISOString(),
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-        },
-        "google-demo-token",
-      );
-      setStatus("success");
-      setTimeout(() => {
-        navigate(ROUTES.dashboard, { replace: true });
-      }, 300);
-    }
-  }, [setSession, navigate]);
-
-  const handleMicrosoftLogin = useCallback(async () => {
-    setStatus("loading");
-    setSubmitError(null);
-    try {
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider: "azure",
-        options: { redirectTo: `${window.location.origin}${ROUTES.dashboard}` },
-      });
-
-      if (error) {
-        setSession(
-          {
-            id: "azure-user-1",
-            email: "sarah.chen@aeromaintain.com",
-            full_name: "Sarah Chen (Microsoft SSO)",
-            role: "admin",
-            organization_id: "org-1",
-            avatar_url: null,
-            is_active: true,
-            last_login_at: new Date().toISOString(),
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString(),
-          },
-          "azure-demo-token",
-        );
-      }
-      setStatus("success");
-      setTimeout(() => {
-        navigate(ROUTES.dashboard, { replace: true });
-      }, 300);
-    } catch {
-      setSession(
-        {
-          id: "azure-user-1",
-          email: "sarah.chen@aeromaintain.com",
-          full_name: "Sarah Chen (Microsoft SSO)",
-          role: "admin",
-          organization_id: "org-1",
-          avatar_url: null,
-          is_active: true,
-          last_login_at: new Date().toISOString(),
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-        },
-        "azure-demo-token",
-      );
-      setStatus("success");
-      setTimeout(() => {
-        navigate(ROUTES.dashboard, { replace: true });
-      }, 300);
-    }
-  }, [setSession, navigate]);
+  const handleMicrosoftLogin = useCallback(() => {
+    setSubmitError("Microsoft sign-in is coming soon.");
+  }, []);
 
   /* ── Button content ── */
   const buttonContent = (() => {
