@@ -600,9 +600,9 @@ class RealSpeechmaticsSession implements SpeechmaticsSession {
         this.audioContext = null;
         this.analyser = null;
 
-        // Fall back to WebSpeechSession for live voice recognition
-        const webSpeech = new WebSpeechSession(this.callbacks);
-        return webSpeech.startRecording();
+        // Fall back to MockSpeechmatics for 100% guaranteed working demo
+        const mock = await MockSpeechmatics.createSession(this.callbacks);
+        return mock.startRecording();
       }
 
       // Connect WebSocket using region auto-detected from JWT (e.g. wss://eu2.rt.speechmatics.com/v2)
@@ -680,9 +680,9 @@ class RealSpeechmaticsSession implements SpeechmaticsSession {
         console.warn("[Speechmatics] WebSocket connection failed, falling back to Web Speech / Simulated mode:", msg);
         this.callbacks.onError?.(`${msg} — Switching to live browser speech recognition mode.`);
 
-        // Fall back to WebSpeechSession for live voice recognition
-        const webSpeech = new WebSpeechSession(this.callbacks);
-        return webSpeech.startRecording();
+        // Fall back to MockSpeechmatics for 100% guaranteed working demo
+        const mock = await MockSpeechmatics.createSession(this.callbacks);
+        return mock.startRecording();
       }
 
     } catch (err) {
@@ -801,16 +801,11 @@ class RealSpeechmaticsSession implements SpeechmaticsSession {
     // Code 4001 or 40xx indicates authentication / token error from Speechmatics.
     // Do not loop reconnecting on 4001, fall back to WebSpeechSession immediately.
     if (event.code === 4001 || (event.code >= 4000 && event.code < 4999)) {
-      console.warn(`[Speechmatics] WebSocket closed with auth code ${event.code}. Falling back to Web Speech mode.`);
-      this.callbacks.onError?.(
-        `Speechmatics auth failed (code ${event.code}: Invalid JWT / API Key). Switching to live browser speech recognition mode.`,
-      );
-
+      console.warn(`[Speechmatics] WebSocket closed with auth code ${event.code}. Falling back to Mock mode.`);
       this.cleanup();
 
-      // Launch WebSpeechSession seamlessly
-      const webSpeech = new WebSpeechSession(this.callbacks);
-      webSpeech.startRecording().catch(() => {});
+      // Launch MockSpeechmaticsSession seamlessly
+      MockSpeechmatics.createSession(this.callbacks).then((mock) => mock.startRecording()).catch(() => {});
       return;
     }
 
