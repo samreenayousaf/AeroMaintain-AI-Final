@@ -1,9 +1,9 @@
 /* ═══════════════════════════════════════════════════════════════
    Speechmatics Service — Abstraction Layer
    ───────────────────────────────────────────────────────────────
-   Provides Mock, Web Speech API, and Real Speechmatics implementations.
+   Provides both Mock, Web Speech API, and Real Speechmatics implementations.
    The UI imports from this module; swap between them via the
-   exported `Speechmatics` constant or `VITE_SPEECHMATICS_MODE` env.
+   exported `Speechmatics` constant.
    ═══════════════════════════════════════════════════════════════ */
 
 import { supabase } from "@/lib/supabase/client";
@@ -234,18 +234,13 @@ class WebSpeechSession implements SpeechmaticsSession {
   private audioContext: AudioContext | null = null;
   private analyser: AnalyserNode | null = null;
   private noiseInterval: ReturnType<typeof setInterval> | null = null;
-  private fallbackTimer: ReturnType<typeof setInterval> | null = null;
   private sessionStartTime = 0;
   private entryCounter = 0;
   private sessionId: string | null = null;
   private sequenceNumber = 0;
-  private phraseQueue: string[] = [];
-  private phraseIndex = 0;
-  private lastTranscriptTime = 0;
 
   constructor(callbacks: SpeechmaticsCallbacks) {
     this.callbacks = callbacks;
-    this.phraseQueue = shuffleArray(AVIATION_PHRASES);
   }
 
   private setStatus(s: ConnectionStatus) {
@@ -254,7 +249,6 @@ class WebSpeechSession implements SpeechmaticsSession {
   }
 
   private emitTranscript(text: string, isFinal: boolean, confidence: number) {
-    this.lastTranscriptTime = Date.now();
     const entry: TranscriptEntry = {
       id: `transcript-${++this.entryCounter}`,
       text: text.trim(),
@@ -271,9 +265,7 @@ class WebSpeechSession implements SpeechmaticsSession {
 
   async startRecording(): Promise<void> {
     this.sessionStartTime = Date.now();
-    this.lastTranscriptTime = Date.now();
     this.setStatus("connecting");
-    this.phraseIndex = 0;
 
     const SpeechRecognition =
       (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
@@ -359,15 +351,6 @@ class WebSpeechSession implements SpeechmaticsSession {
         } catch {}
       }, 200);
     }
-
-    // Safety fallback timer: if no speech transcript was produced for 2.5s, stream realistic phrases
-    this.fallbackTimer = setInterval(() => {
-      if (this.status === "recording" && Date.now() - this.lastTranscriptTime > 2500) {
-        const phrase = this.phraseQueue[this.phraseIndex % this.phraseQueue.length];
-        this.phraseIndex++;
-        this.emitTranscript(phrase, true, 0.92);
-      }
-    }, 2500);
   }
 
   pauseRecording(): void {
@@ -380,7 +363,6 @@ class WebSpeechSession implements SpeechmaticsSession {
   resumeRecording(): void {
     if (this.status === "paused") {
       this.setStatus("recording");
-      this.lastTranscriptTime = Date.now();
       try { this.recognition?.start(); } catch {}
     }
   }
@@ -394,10 +376,6 @@ class WebSpeechSession implements SpeechmaticsSession {
     if (this.noiseInterval) {
       clearInterval(this.noiseInterval);
       this.noiseInterval = null;
-    }
-    if (this.fallbackTimer) {
-      clearInterval(this.fallbackTimer);
-      this.fallbackTimer = null;
     }
     try { this.recognition?.stop(); } catch {}
     this.recognition = null;
@@ -953,7 +931,8 @@ export const Speechmatics: SpeechmaticsService = {
     if (mode === "mock") {
       return MockSpeechmatics.createSession(callbacks);
     }
-    if (mode === "webspeech") {
+    const hasApiKey = !!import.meta.env.VITE_SPEECHMATICS_API_KEY;
+    if (mode === "webspeech" || (!hasApiKey && mode !== "real")) {
       return new WebSpeechSession(callbacks);
     }
     return new RealSpeechmaticsSession(callbacks);
